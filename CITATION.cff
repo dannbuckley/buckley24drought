@@ -1,0 +1,17 @@
+abstract: "Data and code for Montana Tech M.S. thesis (Spring 24)"
+authors:
+  - family-names: Buckley
+    given-names: Daniel
+    orcid: https://orcid.org/0009-0009-2790-9314
+cff-version: 1.2.0
+license: MIT
+message: "If you use this software, please cite both the thesis from preferred-citation and the software itself."
+preferred-citation:
+  authors:
+    - family-names: Buckley
+      given-names: Daniel
+      orcid: https://orcid.org/0009-0009-2790-9314
+  title: "Montana Tech M.S. thesis (Spring 24)"
+  type: thesis
+repository-code: "https://github.com/dannbuckley/buckley24drought"
+title: "Data and code for Montana Tech M.S. thesis (Spring 24)"
