@@ -2,42 +2,39 @@
 import numpy as np
 
 
-def inv_norm(x: float):
+def inv_norm(prob: float) -> float:
     """Inverse normal CDF approximation
 
     Parameters
     ----------
-    x : float
-        CDF value
-    
+    prob : float
+        Non-exceedance probability from the original distribution
+
     Returns
     -------
-    value : float
-        Normal variate
-    
+    float
+        Standard normal variate
+
     Raises
     ------
     ValueError
-        If the input is outside of the interval (0, 1).
+        If the input `prob` is outside of the interval (0, 1).
     """
-    s = None
-    u = None
+    sign: float = None
+    p_t: float = None
 
-    if 0 < x <= 0.5:
-        s = -1
-        u = np.power(-2 * np.log(x), 0.5)
-    elif 0.5 < x < 1.0:
-        s = 1
-        u = np.power(-2 * np.log(1.0 - x), 0.5)
+    # check whether original value was below or above the median
+    if 0 < prob <= 0.5:
+        # below the median, N(0, 1) value will be negative
+        sign = -1.0
+        p_t = np.power(-2 * np.log(prob), 0.5)
+    elif 0.5 < prob < 1.0:
+        # above the median, N(0, 1) value will be positive
+        sign = 1.0
+        p_t = np.power(-2 * np.log(1.0 - prob), 0.5)
     else:
-        raise ValueError('Argument must be between 0 and 1 (exclusive).')
+        raise ValueError("Argument must be between 0 and 1 (exclusive).")
 
-    c0 = 2.515517
-    c1 = 0.802853
-    c2 = 0.010328
-    d1 = 1.432788
-    d2 = 0.189269
-    d3 = 0.001308
-    numer = c0 + (u * (c1 + (u * c2)))
-    denom = 1 + (u * (d1 + (u * (d2 + (u * d3)))))
-    return s * (u - (numer / denom))
+    numer: float = 2.515517 + (p_t * (0.802853 + (p_t * 0.010328)))
+    denom: float = 1 + (p_t * (1.432788 + (p_t * (0.189269 + (p_t * 0.001308)))))
+    return sign * (p_t - (numer / denom))
