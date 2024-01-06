@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "buckley24drought"
-version = "2024.1"
+dynamic = ["version"]
 dependencies = [
     "numpy >= 1.24.4",
     "pandas >= 2.1.4",
@@ -17,6 +17,7 @@ authors = [
 keywords = ["drought"]
 description = "Data and code for Montana Tech M.S. thesis (Spring 24)"
 classifiers = [
+    "Development Status :: 1 - Planning",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
@@ -24,7 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Hydrology",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -40,3 +41,6 @@ testing = [
     "pytest >= 7.4.4",
     "pytest-cov",
 ]
+
+[tool.setuptools.dynamic]
+version = {attr = "buckley24drought.__version__"}
