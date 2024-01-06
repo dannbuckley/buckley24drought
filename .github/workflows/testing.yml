@@ -25,7 +25,7 @@ jobs:
         run: python3 -m pip install -U pip setuptools wheel
       - name: Install buckley24drought with runtime dependencies
         run: python3 -m pip install .
-      - name: Install buckley24drought with testing dependencies
+      - name: Install buckley24drought with development dependencies
         run: python3 -m pip install .[testing]
       - name: Run tests
         run: python3 -m pytest tests/
