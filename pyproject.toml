@@ -15,7 +15,7 @@ authors = [
     { name = "Daniel N. Buckley", email = "buckley.daniel.n@gmail.com" },
 ]
 keywords = ["drought"]
-description = "Data and code for Montana Tech M.S. thesis (Spring 24)"
+description = "Data and code for 'Investigating the drought sensitivity of intermontane-basin groundwater systems in western Montana using standardized drought indices' (Buckley, 2024)"
 classifiers = [
     "Development Status :: 1 - Planning",
     "Intended Audience :: Science/Research",

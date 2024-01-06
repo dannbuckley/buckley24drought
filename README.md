@@ -1,5 +1,5 @@
 # buckley24drought
-Data and code for Montana Tech M.S. thesis (Spring 24)
+Data and code for 'Investigating the drought sensitivity of intermontane-basin groundwater systems in western Montana using standardized drought indices' (Buckley, 2024)
 
 ## Development
 All Python code in `src/buckley24drought/` is linted using [Pylint](https://pypi.org/project/pylint/) on every push and PR.

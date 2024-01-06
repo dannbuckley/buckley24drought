@@ -1,4 +1,4 @@
-abstract: "Data and code for Montana Tech M.S. thesis (Spring 24)"
+abstract: "Data and code for 'Investigating the drought sensitivity of intermontane-basin groundwater systems in western Montana using standardized drought indices' (Buckley, 2024)"
 authors:
   - family-names: Buckley
     given-names: Daniel N.
@@ -13,8 +13,8 @@ preferred-citation:
       orcid: https://orcid.org/0009-0009-2790-9314
   journal: "Graduate Theses & Non-Theses"
   thesis-type: "M.S. thesis"
-  title: "Montana Tech M.S. thesis (Spring 24)"
+  title: "Investigating the drought sensitivity of intermontane-basin groundwater systems in western Montana using standardized drought indices"
   type: thesis
 repository-code: "https://github.com/dannbuckley/buckley24drought"
-title: "Data and code for Montana Tech M.S. thesis (Spring 24)"
+title: "Data and code for 'Investigating the drought sensitivity of intermontane-basin groundwater systems in western Montana using standardized drought indices'"
 type: software
