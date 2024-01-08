@@ -43,3 +43,6 @@ testing = [
 
 [tool.setuptools.dynamic]
 version = {attr = "buckley24drought.__version__"}
+
+[tool.setuptools.dynamic.optional-dependencies.tests]
+file = [ "reqs/test.txt", ]
