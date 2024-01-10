@@ -40,6 +40,10 @@ testing = [
     "pytest",
     "pytest-cov",
 ]
+plotting = [
+    "matplotlib",
+    "seaborn",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "buckley24drought.__version__"}
