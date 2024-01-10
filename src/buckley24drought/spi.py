@@ -43,7 +43,8 @@ class SPI:
         Parameters
         ----------
         window : int, default=1
-            Length of the moving average window. Must be between 1 and 48 months.
+            Length of the moving average window.
+            Must be between 1 and 48 months (inclusive).
 
         Returns
         -------
@@ -57,7 +58,7 @@ class SPI:
         """
         if window < 1 or window > 48:
             raise ValueError(
-                "Moving average window length must be between 1 and 48 months."
+                "Moving average window length must be between 1 and 48 months (inclusive)."
             )
 
         # generate SPI series
@@ -93,12 +94,14 @@ class SPI:
         Parameters
         ----------
         window : int, default=1
-            Length of the moving average window. Must be between 1 and 48 months.
+            Length of the moving average window.
+            Must be between 1 and 48 months (inclusive).
 
         Returns
         -------
         data_gen : pandas.DataFrame
-            A DataFrame containing the following columns: `area`, `end_date`, `month`, `SPI`
+            A DataFrame containing the following columns:
+            `area`, `end_date`, `month`, `SPI`
 
         Raises
         ------
@@ -107,7 +110,7 @@ class SPI:
         """
         if window < 1 or window > 48:
             raise ValueError(
-                "Moving average window length must be between 1 and 48 months."
+                "Moving average window length must be between 1 and 48 months (inclusive)."
             )
 
         data_gen = self.data.copy(deep=True)
