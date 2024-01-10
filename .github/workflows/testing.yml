@@ -28,4 +28,4 @@ jobs:
       - name: Install buckley24drought with development dependencies
         run: python3 -m pip install .[testing]
       - name: Run tests
-        run: python3 -m pytest tests/
+        run: python3 -m pytest --cov tests/
