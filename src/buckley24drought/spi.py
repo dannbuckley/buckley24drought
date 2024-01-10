@@ -34,7 +34,7 @@ class SPI:
         # add integer column for the month number
         self.data["month"] = self.data["end_date"].apply(lambda x: x.month)
 
-    def check_fit(self, window: int = 1):
+    def check_fit(self, window: int = 1) -> pd.DataFrame:
         """Check the goodness-of-fit of the SPI for a given window length.
 
         Uses the two-sided Kolmogorov-Smirnov goodness-of-fit test to compare
@@ -88,7 +88,7 @@ class SPI:
         # transform metadata into a pivot table
         return data_meta.pivot_table(values="pvalue", index="area", columns="month")
 
-    def generate_series(self, window: int = 1):
+    def generate_series(self, window: int = 1) -> pd.DataFrame:
         """Generate the SPI for a given window length.
 
         Parameters

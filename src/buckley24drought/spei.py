@@ -12,7 +12,7 @@ from .data import gridmet
 from .util import inv_norm
 
 
-def loglogistic_cdf(value: float, alpha: float, beta: float, gamma: float):
+def loglogistic_cdf(value: float, alpha: float, beta: float, gamma: float) -> float:
     """CDF of the 3-parameter log-logistic distribution (see Singh, Guo, & Yu, 1993)
 
     Parameters
@@ -70,7 +70,7 @@ class SPEI:
         # add integer column for the month number
         self.data["month"] = self.data["end_date"].apply(lambda x: x.month)
 
-    def check_fit(self, window: int = 1):
+    def check_fit(self, window: int = 1) -> pd.DataFrame:
         """Check the goodness-of-fit of the SPEI for a given window length.
 
         Uses the two-sided Kolmogorov-Smirnov goodness-of-fit test to compare
@@ -124,7 +124,7 @@ class SPEI:
         # transform metadata into a pivot table
         return data_meta.pivot_table(values="pvalue", index="area", columns="month")
 
-    def generate_series(self, window: int = 1):
+    def generate_series(self, window: int = 1) -> pd.DataFrame:
         """Generate the SPEI for a given window length.
 
         Parameters
