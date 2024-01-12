@@ -28,4 +28,4 @@ jobs:
       - name: Install buckley24drought with development dependencies
         run: python3 -m pip install .[testing]
       - name: Lint Python files
-        run: python3 -m pylint src/buckley24drought/*.py
+        run: python3 -m pylint src/buckley24drought/*
