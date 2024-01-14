@@ -1,5 +1,5 @@
 """SPEI module"""
-
+# pylint: disable=R0801
 from functools import partial
 from importlib.resources import files, as_file
 
@@ -12,18 +12,20 @@ from .data import gridmet
 from .util import inv_norm
 
 
-def loglogistic_cdf(value: float, alpha: float, beta: float, gamma: float) -> float:
+def loglogistic_cdf(
+    value: float, p_alpha: float, p_beta: float, p_gamma: float
+) -> float:
     """CDF of the 3-parameter log-logistic distribution (see Singh, Guo, & Yu, 1993)
 
     Parameters
     ----------
     value : float
         Must be greater than `gamma`.
-    alpha : float
+    p_alpha : float
         Must be greater than 0 (zero).
-    beta : float
+    p_beta : float
         Must be greater than or equal to 1 (one).
-    gamma : float
+    p_gamma : float
         Must be less than `value`.
 
     Returns
@@ -36,14 +38,14 @@ def loglogistic_cdf(value: float, alpha: float, beta: float, gamma: float) -> fl
     ValueError
         If `alpha` <= 0, `value` <= `gamma`, or `beta` < 1.
     """
-    if alpha <= 0:
+    if p_alpha <= 0:
         raise ValueError("Parameter alpha must be greater than 0 (zero).")
-    elif value <= gamma:
+    if value <= p_gamma:
         raise ValueError("Value must be greater than the gamma parameter.")
-    elif beta < 1:
+    if p_beta < 1:
         raise ValueError("Parameter beta must be greater than or equal to 1 (one).")
-    return np.power((value - gamma) / alpha, beta) / (
-        1 + np.power((value - gamma) / alpha, beta)
+    return np.power((value - p_gamma) / p_alpha, p_beta) / (
+        1 + np.power((value - p_gamma) / p_alpha, p_beta)
     )
 
 

@@ -1,5 +1,5 @@
 """SPI module"""
-
+# pylint: disable=R0801
 from functools import partial
 from importlib.resources import files, as_file
 
