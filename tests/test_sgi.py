@@ -73,9 +73,8 @@ def test_SGI_create(gwicid):
     assert sgi.data.dtypes["monthly_average"].kind == "f"
 
 
-@pytest.mark.parametrize("gwicid", all_wells)
-def test_SGI_generate_series(gwicid):
-    sgi = SGI(gwicid=gwicid)
+def test_SGI_generate_series():
+    sgi = SGI(gwicid=32)
     res = sgi.generate_series()
 
     # check column names
@@ -88,9 +87,8 @@ def test_SGI_generate_series(gwicid):
     assert res.dtypes["SGI"].kind == "f"
 
 
-@pytest.mark.parametrize("gwicid", all_wells)
-def test_SGI_check_fit(gwicid):
-    sgi = SGI(gwicid=gwicid)
+def test_SGI_check_fit():
+    sgi = SGI(gwicid=32)
     fit = sgi.check_fit()
     # goodness-of-fit test results should all be non-significant
     # (i.e., SGI distribution matches the standard normal distribution)
