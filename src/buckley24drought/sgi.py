@@ -273,8 +273,10 @@ class SGI:
         temp_df["gwicid"] = self.data["gwicid"].drop_duplicates().values[0]
         # add integer column for the month number
         temp_df["month"] = temp_df["date"].apply(lambda x: x.month)
-        self.data = temp_df.reindex(
-            columns=["gwicid", "date", "month", "monthly_average"]
+        self.data = (
+            temp_df.reindex(columns=["gwicid", "date", "month", "monthly_average"])
+            # constrain record to study period
+            .query("date >= '1991-01-01' and date <= '2020-12-31'").copy(deep=True)
         )
 
     def check_fit(self) -> pd.DataFrame:
