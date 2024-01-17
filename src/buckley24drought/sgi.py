@@ -1,7 +1,7 @@
 """SGI module"""
 # pylint: disable=R0801
 from functools import partial
-from importlib.resources import files, as_file
+from importlib.resources import files
 
 import numpy as np
 import pandas as pd
@@ -249,15 +249,14 @@ class SGI:
             )
 
         # get well data from package resources
-        rsrc = files(swl).joinpath(f"{gwicid}.csv")
-        with as_file(rsrc) as csv:
-            self.data = pd.read_csv(
-                csv,
-                index_col="date",
-                usecols=["gwicid", "date", "daily_average"],
-                # enforce date type for date column
-                parse_dates=[1],
-            )
+        rsrc = files(swl) / f"{gwicid}.csv"
+        self.data = pd.read_csv(
+            rsrc,
+            index_col="date",
+            usecols=["gwicid", "date", "daily_average"],
+            # enforce date type for date column
+            parse_dates=["date"],
+        )
         # interpret water levels as heads
         self.data["daily_average"] = -self.data["daily_average"]
 
