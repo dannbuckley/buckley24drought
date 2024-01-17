@@ -73,6 +73,7 @@ def test_SGI_create(gwicid):
     assert sgi.data.dtypes["monthly_average"].kind == "f"
 
 
+@pytest.mark.intg
 def test_SGI_generate_series():
     sgi = SGI(gwicid=32)
     res = sgi.generate_series()
@@ -87,6 +88,7 @@ def test_SGI_generate_series():
     assert res.dtypes["SGI"].kind == "f"
 
 
+@pytest.mark.intg
 def test_SGI_check_fit():
     sgi = SGI(gwicid=32)
     fit = sgi.check_fit()
