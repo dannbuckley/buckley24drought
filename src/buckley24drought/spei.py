@@ -1,7 +1,7 @@
 """SPEI module"""
 # pylint: disable=R0801
 from functools import partial
-from importlib.resources import files, as_file
+from importlib.resources import files
 
 import numpy as np
 import pandas as pd
@@ -60,15 +60,14 @@ class SPEI:
 
     def __init__(self):
         # get climatic water balance data from package resources
-        rsrc = files(gridmet).joinpath("balance_eto_gridmet_1981_2020.csv")
-        with as_file(rsrc) as csv:
-            self.data = pd.read_csv(
-                csv,
-                # start_date not needed for analysis
-                usecols=["area", "end_date", "value"],
-                # enforce date type for end_date column
-                parse_dates=[1],
-            )
+        rsrc = files(gridmet) / "balance_eto_gridmet_1981_2020.csv"
+        self.data = pd.read_csv(
+            rsrc,
+            # start_date not needed for analysis
+            usecols=["area", "end_date", "value"],
+            # enforce date type for end_date column
+            parse_dates=["end_date"],
+        )
         # add integer column for the month number
         self.data["month"] = self.data["end_date"].apply(lambda x: x.month)
 
