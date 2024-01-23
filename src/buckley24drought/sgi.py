@@ -113,7 +113,7 @@ class GaussianKDE1D:
 
     def ucv(self, bandwidth: float) -> float:
         """Unbiased cross-validation criterion for estimated bandwidth
-        (see Scott & Sain, 2005, pg. 236)
+        (see Scott & Sain, 2005, pg. 236).
 
         Parameters
         ----------
@@ -123,6 +123,7 @@ class GaussianKDE1D:
         Returns
         -------
         float
+            Error associated with given bandwidth value
 
         Raises
         ------
@@ -154,11 +155,12 @@ class GaussianKDE1D:
         return er_sq - er_lo
 
     def find_bandwidth(self):
-        """Find optimal bandwidth for the data
+        """Find optimal bandwidth for the data.
 
         Returns
         -------
         float
+            Bandwidth that minimizes the error of the kernel density estimate
         """
         # start with suboptimal bandwidth
         bnd0 = [
@@ -290,6 +292,17 @@ class SGI:
         sgi_df = self.generate_series()
 
         def _apply_test(month: int, sgi_df: pd.DataFrame):
+            """Apply the two-sided Kolomogorov-Smirnov test to the SGI data.
+
+            Parameters
+            ----------
+            month : int
+            sgi_df : pandas.DataFrame
+
+            Returns
+            -------
+            pvalue : float
+            """
             return kstest(
                 rvs=sgi_df.query(f"month == {month}")["SGI"].dropna(),
                 cdf=norm.cdf,
@@ -318,7 +331,18 @@ class SGI:
 
         def _inv_norm_wrapper(value: float, kde: GaussianKDE1D) -> float:
             """Wrapper function to combine inv_norm and GaussianKDE1D.opt_cdf.
-            This is a fix for pylint W0640."""
+            This is a fix for pylint W0640.
+
+            Parameters
+            ----------
+            value : float
+            kde : GaussianKDE1D
+
+            Returns
+            -------
+            float
+                Result of inverse normal CDF
+            """
             return inv_norm(kde.opt_cdf(value))
 
         transformed_dict = {"index": [], "SGI": []}
@@ -328,10 +352,9 @@ class SGI:
             ].dropna()
             transformed_dict["index"].extend(month_data.index)
             month_kde = GaussianKDE1D(month_data.values)
-            month_sgi = list(
+            transformed_dict["SGI"].extend(
                 map(partial(_inv_norm_wrapper, kde=month_kde), month_data.values)
             )
-            transformed_dict["SGI"].extend(month_sgi)
         data_gen = self.data.copy(deep=True).drop(columns="monthly_average")
         data_gen["SGI"] = pd.Series(
             data=transformed_dict["SGI"], index=transformed_dict["index"]

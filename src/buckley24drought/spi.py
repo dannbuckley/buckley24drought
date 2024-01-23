@@ -67,6 +67,17 @@ class SPI:
         data_meta = self.data[["area", "month"]].drop_duplicates().copy(deep=True)
 
         def _apply_test(row: pd.Series, spi_df: pd.DataFrame):
+            """Apply the two-sided Kolmogorov-Smirnov test to the SPI data.
+
+            Parameters
+            ----------
+            row : pandas.Series
+            spi_df : pandas.DataFrame
+
+            Returns
+            -------
+            pvalue : float
+            """
             return kstest(
                 rvs=spi_df.query(
                     f"area == '{row['area']}' and month == {row['month']}"

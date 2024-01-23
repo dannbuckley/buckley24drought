@@ -105,6 +105,17 @@ class SPEI:
         data_meta = self.data[["area", "month"]].drop_duplicates().copy(deep=True)
 
         def _apply_test(row: pd.Series, spei_df: pd.DataFrame):
+            """Apply the two-sided Kolmogorov-Smirnov test to the SPEI data.
+
+            Parameters
+            ----------
+            row : pandas.Series
+            spei_df : pandas.DataFrame
+
+            Returns
+            -------
+            pvalue : float
+            """
             return kstest(
                 rvs=spei_df.query(
                     f"area == '{row['area']}' and month == {row['month']}"
