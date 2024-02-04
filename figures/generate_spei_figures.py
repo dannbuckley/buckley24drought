@@ -31,8 +31,8 @@ def generate_fit_heatmap(window: int = 1):
             f"SPEI-{window} Goodness-of-Fit\nP-Values from Two-Sided Kolmogorov-Smirnov Test",
             fontweight="bold",
         )
-        ax.set_xlabel("Month")
-        ax.set_ylabel("Area")
+        ax.set_xlabel("Month", fontweight="bold")
+        ax.set_ylabel("Area", fontweight="bold")
         fig.savefig(fname=f"spei/fit/spei_fit_{window}.svg", dpi=300, format="svg")
         plt.close(fig)
         print(f"Figure spei/fit/spei_fit_{window}.svg generated.")
@@ -48,8 +48,8 @@ def generate_series_plot(window: int = 1):
         spei_df = pd.read_csv(f"../index_data/spei/spei_{window}.csv", parse_dates=[1])
         spei_df["year"] = spei_df["end_date"].apply(lambda x: x.year)
 
-        fig, ax = plt.subplots(nrows=3, ncols=1, squeeze=True, figsize=(8, 5))
-        for i, area in enumerate(["Bitterroot", "Gallatin", "Paradise Valley"]):
+        fig, ax = plt.subplots(nrows=2, ncols=1, squeeze=True, figsize=(8, 5))
+        for i, area in enumerate(["Bitterroot", "Gallatin"]):
             temp_df = spei_df.query(f"area == '{area}'")
             ax[i].set_xlim(temp_df.index[0], temp_df.index[-1])
             ax[i].set_ylim(

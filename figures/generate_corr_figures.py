@@ -40,7 +40,6 @@ def generate_crosscorr_plots():
     # load metadata for study areas
     bv_meta = _get_meta_df("Bitterroot")
     gv_meta = _get_meta_df("Gallatin")
-    pv_meta = _get_meta_df("Paradise")
 
     # load all SPI data into one dataframe
     spi_df = pd.read_csv(
@@ -338,15 +337,12 @@ def generate_crosscorr_plots():
 
     bv_corr = _get_cross_corr_df("Bitterroot", bv_meta, spi_df)
     gv_corr = _get_cross_corr_df("Gallatin", gv_meta, spi_df)
-    pv_corr = _get_cross_corr_df("Paradise Valley", pv_meta, spi_df)
     _generate_heatmap("Bitterroot Valley", "bitterroot", bv_corr, bv_meta)
     _generate_heatmap("Gallatin Valley", "gallatin", gv_corr, gv_meta)
     _generate_series_plots(bv_corr, bv_meta)
     _generate_series_plots(gv_corr, gv_meta)
-    _generate_series_plots(pv_corr, pv_meta)
     _generate_spi_sgi_mosaic_plots("Bitterroot", bv_corr, bv_meta)
     _generate_spi_sgi_mosaic_plots("Gallatin", gv_corr, gv_meta)
-    _generate_spi_sgi_mosaic_plots("Paradise Valley", pv_corr, pv_meta)
 
 
 parser = ArgumentParser()
