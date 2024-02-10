@@ -1,3 +1,4 @@
+from time import time
 from buckley24drought.spei import SPEI
 
 
@@ -7,9 +8,13 @@ def generate_spei_data(window: int = 1):
 
     try:
         spei = SPEI()
+        time_start = time()
         df = spei.generate_series(window=window)
+        time_end = time()
         df.to_csv(f"spei/spei_{window}.csv", index=False, header=True)
-        print(f"SPEI-{window} series saved at spei/spei_{window}.csv")
+        print(
+            f"SPEI-{window} series saved at spei/spei_{window}.csv ({time_end - time_start:.1f})"
+        )
     except ValueError:
         print(f"SPEI-{window} skipped.")
 

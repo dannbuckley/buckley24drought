@@ -59,6 +59,24 @@ def generate_crosscorr_plots():
             right_on=["area", "end_date"],
         )
 
+    # load all SPEI data into one dataframe
+    spei_df = pd.read_csv(
+        "../index_data/spei/spei_1.csv",
+        usecols=["area", "end_date", "SPEI"],
+        parse_dates=["end_date"],
+    ).rename(columns={"SPEI": "SPEI_1"})
+    # merge in remaining SPEI records
+    for window in range(2, 49):
+        spei_df = spei_df.merge(
+            right=pd.read_csv(
+                f"../index_data/spei/spei_{window}.csv",
+                usecols=["area", "end_date", "SPEI"],
+                parse_dates=["end_date"],
+            ).rename(columns={"SPEI": f"SPEI_{window}"}),
+            left_on=["area", "end_date"],
+            right_on=["area", "end_date"],
+        )
+
     def _get_cross_corr_df(
         area: str, meta_df: pd.DataFrame, spi_df: pd.DataFrame
     ) -> pd.DataFrame:
@@ -113,7 +131,11 @@ def generate_crosscorr_plots():
         )
 
     def _generate_heatmap(
-        title: str, filename: str, corr_df: pd.DataFrame, meta_df: pd.DataFrame
+        title: str,
+        filename: str,
+        corr_df: pd.DataFrame,
+        meta_df: pd.DataFrame,
+        spei: bool = False,
     ):
         """Generate a cross-correlation heatmap for the given area.
 
@@ -124,9 +146,10 @@ def generate_crosscorr_plots():
         corr_df : pandas.DataFrame
         meta_df : pandas.DataFrame
         """
+        index_label = "SPEI" if spei else "SPI"
         fig, ax = plt.subplots(figsize=(corr_df.shape[1] // 2, corr_df.shape[0] // 2))
         sns.heatmap(data=corr_df, vmax=1, cmap="RdGy_r", center=0, ax=ax)
-        ax.set_xlabel("SPI Accumulation Period", fontweight="bold")
+        ax.set_xlabel(f"{index_label} Accumulation Period", fontweight="bold")
         # use upright integer tick labels for x-axis
         ax.set_xticks(
             ax.get_xticks(),
@@ -143,15 +166,23 @@ def generate_crosscorr_plots():
             ),
         )
         ax.set_title(
-            f"SPI vs. SGI Cross-Correlation (Spearman) for the {title}",
+            f"{index_label} vs. SGI Cross-Correlation (Spearman) for the {title}",
             fontsize=18,
             fontweight="bold",
         )
-        fig.savefig(fname=f"corr/cross/heatmap/{filename}.svg", dpi=300, format="svg")
-        print(f"Heatmap figure generated at corr/cross/heatmap/{filename}.svg")
+        fig.savefig(
+            fname=f"corr/cross/heatmap/{filename}_{index_label.lower()}.svg",
+            dpi=300,
+            format="svg",
+        )
+        print(
+            f"Heatmap figure generated at corr/cross/heatmap/{filename}_{index_label.lower()}.svg"
+        )
         plt.close(fig)
 
-    def _generate_series_plots(corr_df: pd.DataFrame, meta_df: pd.DataFrame):
+    def _generate_series_plots(
+        corr_df: pd.DataFrame, meta_df: pd.DataFrame, spei: bool = False
+    ):
         """Generate individual cross-correlation plots for each SGI record.
 
         Parameters
@@ -159,6 +190,7 @@ def generate_crosscorr_plots():
         corr_df : pandas.DataFrame
         meta_df : pandas.DataFrame
         """
+        index_label = "SPEI" if spei else "SPI"
         xticks = np.array([1, 3, 6, 12, 24, 48])
         for gwicid in meta_df["gwicid"]:
             corr_val = corr_df.loc[f"SGI_{gwicid}"]
@@ -179,24 +211,28 @@ def generate_crosscorr_plots():
             )
             ax.set_xlim(0, 49)
             ax.set_xticks(xticks, xticks.astype(str))
-            ax.set_xlabel("SPI Accumulation Period")
+            ax.set_xlabel(f"{index_label} Accumulation Period")
             ax.set_ylabel("Cross-correlation (Spearman)")
             ax.set_title(
-                f"SPI vs. SGI for GWIC ID {gwicid}", loc="left", fontweight="bold"
+                f"{index_label} vs. SGI for GWIC ID {gwicid}",
+                loc="left",
+                fontweight="bold",
             )
             sns.despine(ax=ax)
             fig.savefig(
-                fname=f"corr/cross/series/spi_sgi_{gwicid}.svg", dpi=300, format="svg"
+                fname=f"corr/cross/series/{index_label.lower()}_sgi_{gwicid}.svg",
+                dpi=300,
+                format="svg",
             )
             print(
-                f"Cross-correlation series figure generated at corr/cross/series/spi_sgi_{gwicid}.svg"
+                f"Cross-correlation series figure generated at corr/cross/series/{index_label.lower()}_sgi_{gwicid}.svg"
             )
             plt.close(fig)
 
-    def _generate_spi_sgi_mosaic_plots(
-        area: str, corr_df: pd.DataFrame, meta_df: pd.DataFrame
+    def _generate_met_sgi_mosaic_plots(
+        area: str, corr_df: pd.DataFrame, meta_df: pd.DataFrame, spei: bool = False
     ):
-        """Combine SPI series, SGI series, and cross-correlation series into one figure.
+        """Combine SPI/SPEI series, SGI series, and cross-correlation series into one figure.
 
         Parameters
         ----------
@@ -206,14 +242,15 @@ def generate_crosscorr_plots():
         meta_df : pandas.DataFrame
         """
         corr_xticks = np.array([1, 3, 6, 12, 24, 48])
+        index_label = "SPEI" if spei else "SPI"
         for gwicid in meta_df["gwicid"]:
             corr_val = corr_df.loc[f"SGI_{gwicid}"]
 
-            spi_max_per = np.argmax(corr_val) + 1
-            spi_sgi_df = pd.merge(
+            met_max_per = np.argmax(corr_val) + 1
+            met_sgi_df = pd.merge(
                 left=pd.read_csv(
-                    f"../index_data/spi/spi_{spi_max_per}.csv",
-                    usecols=["area", "end_date", "SPI"],
+                    f"../index_data/{index_label.lower()}/{index_label.lower()}_{met_max_per}.csv",
+                    usecols=["area", "end_date", index_label],
                     parse_dates=["end_date"],
                 )
                 .query(f"area == '{area}'")
@@ -235,58 +272,59 @@ def generate_crosscorr_plots():
 
             fig = plt.figure(figsize=(10, 4), layout="constrained")
             ax_dict = fig.subplot_mosaic(
-                mosaic=[["spi", "corr"], ["sgi", "corr"]], width_ratios=[1.5, 1]
+                mosaic=[[index_label, "corr"], ["sgi", "corr"]], width_ratios=[1.5, 1]
             )
 
             for _, ax in ax_dict.items():
                 sns.despine(ax=ax)
 
-            # === SPI PLOT ===
-            ax_dict["spi"].axhline(y=0, color="black")
-            ax_dict["spi"].fill_between(
-                x=spi_sgi_df["end_date"],
-                y1=spi_sgi_df["SPI"],
+            # === SPI/SPEI PLOT ===
+            ax_dict[index_label].axhline(y=0, color="black")
+            ax_dict[index_label].fill_between(
+                x=met_sgi_df["end_date"],
+                y1=met_sgi_df[index_label],
                 y2=0,
-                where=spi_sgi_df["SPI"] > 0,
+                where=met_sgi_df[index_label] > 0,
                 step="mid",
                 edgecolor=to_rgba("tab:blue", 0.8),
                 facecolor=to_rgba("tab:cyan", 0.6),
                 lw=1.5,
             )
-            ax_dict["spi"].fill_between(
-                x=spi_sgi_df["end_date"],
-                y1=spi_sgi_df["SPI"],
+            ax_dict[index_label].fill_between(
+                x=met_sgi_df["end_date"],
+                y1=met_sgi_df[index_label],
                 y2=0,
-                where=spi_sgi_df["SPI"] <= 0,
+                where=met_sgi_df[index_label] <= 0,
                 step="mid",
                 edgecolor=to_rgba("firebrick", 0.8),
                 facecolor=to_rgba("tab:red", 0.6),
                 lw=1.5,
             )
-            ax_dict["spi"].set_xticks(
-                ax_dict["spi"].get_xticks(), ["" for _ in ax_dict["spi"].get_xticks()]
+            ax_dict[index_label].set_xticks(
+                ax_dict[index_label].get_xticks(),
+                ["" for _ in ax_dict[index_label].get_xticks()],
             )
-            ax_dict["spi"].set_xlim(
-                spi_sgi_df["end_date"].iloc[0], spi_sgi_df["end_date"].iloc[-1]
+            ax_dict[index_label].set_xlim(
+                met_sgi_df["end_date"].iloc[0], met_sgi_df["end_date"].iloc[-1]
             )
-            ax_dict["spi"].set_ylim(
-                np.min([np.min(spi_sgi_df["SPI"]), -3]),
-                np.max([np.max(spi_sgi_df["SPI"]), 3]),
+            ax_dict[index_label].set_ylim(
+                np.min([np.min(met_sgi_df[index_label]), -3]),
+                np.max([np.max(met_sgi_df[index_label]), 3]),
             )
-            ax_dict["spi"].set_ylabel(f"SPI-{spi_max_per}")
-            ax_dict["spi"].set_title("(a)", loc="left", fontweight="bold")
+            ax_dict[index_label].set_ylabel(f"{index_label}-{met_max_per}")
+            ax_dict[index_label].set_title("(a)", loc="left", fontweight="bold")
 
             # === SGI PLOT ===
             ax_dict["sgi"].axhline(y=0, color="black")
             sns.lineplot(
-                data=spi_sgi_df,
+                data=met_sgi_df,
                 x="end_date",
                 y="SGI",
                 color=to_rgba("tab:gray", 0.6),
                 ax=ax_dict["sgi"],
             )
             sns.scatterplot(
-                data=spi_sgi_df,
+                data=met_sgi_df,
                 x="end_date",
                 y="SGI",
                 color="black",
@@ -295,11 +333,11 @@ def generate_crosscorr_plots():
                 s=15,
             )
             ax_dict["sgi"].set_xlim(
-                spi_sgi_df["end_date"].iloc[0], spi_sgi_df["end_date"].iloc[-1]
+                met_sgi_df["end_date"].iloc[0], met_sgi_df["end_date"].iloc[-1]
             )
             ax_dict["sgi"].set_ylim(
-                np.min([np.min(spi_sgi_df["SGI"]), -3]),
-                np.max([np.max(spi_sgi_df["SGI"]), 3]),
+                np.min([np.min(met_sgi_df["SGI"]), -3]),
+                np.max([np.max(met_sgi_df["SGI"]), 3]),
             )
             ax_dict["sgi"].set_xlabel("Date")
             ax_dict["sgi"].set_ylabel(f"SGI (GWIC {gwicid})")
@@ -310,39 +348,49 @@ def generate_crosscorr_plots():
                 np.arange(1, 49), corr_val, color=to_rgba("tab:gray", 0.6)
             )
             ax_dict["corr"].plot(
-                [spi_max_per], [corr_val.max()], "ko", label="Max. Corr."
+                [met_max_per], [corr_val.max()], "ko", label="Max. Corr."
             )
             ax_dict["corr"].legend()
             corr_ymin, corr_ymax = ax_dict["corr"].get_ylim()
             ax_dict["corr"].axvline(
-                x=spi_max_per,
+                x=met_max_per,
                 ymax=(corr_val.max() - corr_ymin) / (corr_ymax - corr_ymin),
                 color="black",
                 ls="--",
             )
             ax_dict["corr"].set_xlim(0, 49)
             ax_dict["corr"].set_xticks(corr_xticks, corr_xticks.astype(str))
-            ax_dict["corr"].set_xlabel("SPI Accumulation Period")
+            ax_dict["corr"].set_xlabel(f"{index_label} Accumulation Period")
             ax_dict["corr"].set_title("(c)", loc="left", fontweight="bold")
 
             fig.savefig(
-                fname=f"corr/cross/mosaic/maxspi_sgi_{gwicid}.svg",
+                fname=f"corr/cross/mosaic/max{index_label.lower()}_sgi/max{index_label.lower()}_sgi_{gwicid}.svg",
                 dpi=300,
                 format="svg",
             )
             print(
-                f"Mosaic SPI-SGI figure generated at corr/cross/mosaic/maxspi_sgi_{gwicid}.svg"
+                f"Mosaic {index_label}-SGI figure generated at corr/cross/mosaic/max{index_label.lower()}_sgi/max{index_label.lower()}_sgi_{gwicid}.svg"
             )
             plt.close(fig)
 
-    bv_corr = _get_cross_corr_df("Bitterroot", bv_meta, spi_df)
-    gv_corr = _get_cross_corr_df("Gallatin", gv_meta, spi_df)
-    _generate_heatmap("Bitterroot Valley", "bitterroot", bv_corr, bv_meta)
-    _generate_heatmap("Gallatin Valley", "gallatin", gv_corr, gv_meta)
-    _generate_series_plots(bv_corr, bv_meta)
-    _generate_series_plots(gv_corr, gv_meta)
-    _generate_spi_sgi_mosaic_plots("Bitterroot", bv_corr, bv_meta)
-    _generate_spi_sgi_mosaic_plots("Gallatin", gv_corr, gv_meta)
+    bv_corr_spi = _get_cross_corr_df("Bitterroot", bv_meta, spi_df)
+    gv_corr_spi = _get_cross_corr_df("Gallatin", gv_meta, spi_df)
+    bv_corr_spei = _get_cross_corr_df("Bitterroot", bv_meta, spei_df)
+    gv_corr_spei = _get_cross_corr_df("Gallatin", gv_meta, spei_df)
+    _generate_heatmap("Bitterroot Valley", "bitterroot", bv_corr_spi, bv_meta)
+    _generate_heatmap("Gallatin Valley", "gallatin", gv_corr_spi, gv_meta)
+    _generate_heatmap(
+        "Bitterroot Valley", "bitterroot", bv_corr_spei, bv_meta, spei=True
+    )
+    _generate_heatmap("Gallatin Valley", "gallatin", gv_corr_spei, gv_meta, spei=True)
+    _generate_series_plots(bv_corr_spi, bv_meta)
+    _generate_series_plots(gv_corr_spi, gv_meta)
+    _generate_series_plots(bv_corr_spei, bv_meta, spei=True)
+    _generate_series_plots(gv_corr_spei, gv_meta, spei=True)
+    _generate_met_sgi_mosaic_plots("Bitterroot", bv_corr_spi, bv_meta)
+    _generate_met_sgi_mosaic_plots("Gallatin", gv_corr_spi, gv_meta)
+    _generate_met_sgi_mosaic_plots("Bitterroot", bv_corr_spei, bv_meta, spei=True)
+    _generate_met_sgi_mosaic_plots("Gallatin", gv_corr_spei, gv_meta, spei=True)
 
 
 parser = ArgumentParser()

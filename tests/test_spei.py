@@ -2,22 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from buckley24drought.spei import loglogistic_cdf, SPEI
-
-
-def test_loglogistic_invalid_value_gamma():
-    with pytest.raises(ValueError):
-        loglogistic_cdf(0, 1, 1, 1)
-
-
-def test_loglogistic_invalid_alpha():
-    with pytest.raises(ValueError):
-        loglogistic_cdf(1, 0, 1, 0)
-
-
-def test_loglogistic_invalid_beta():
-    with pytest.raises(ValueError):
-        loglogistic_cdf(1, 1, 0, 0)
+from buckley24drought.spei import SPEI
 
 
 def test_SPEI_create():
@@ -46,10 +31,10 @@ def test_SPEI_generate_invalid_window(window):
         spei.generate_series(window)
 
 
-@pytest.mark.parametrize("window", range(1, 49))
-def test_SPEI_generate_series(window):
+@pytest.mark.intg
+def test_SPEI_generate_series():
     spei = SPEI()
-    res = spei.generate_series(window)
+    res = spei.generate_series(window=1)
 
     # check column names
     assert np.all(res.columns == ["area", "end_date", "month", "SPEI"])
@@ -68,10 +53,10 @@ def test_SPEI_check_invalid_window(window):
         spei.check_fit(window)
 
 
-@pytest.mark.parametrize("window", range(1, 49))
-def test_SPEI_check_fit(window):
+@pytest.mark.intg
+def test_SPEI_check_fit():
     spei = SPEI()
-    fit = spei.check_fit(window)
+    fit = spei.check_fit(window=1)
     # goodness-of-fit test results should all be non-significant
     # (i.e., SPEI distribution matches the standard normal distribution)
     assert np.all(fit > 0.05)

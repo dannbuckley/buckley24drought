@@ -1,52 +1,14 @@
 """SPEI module"""
+
 # pylint: disable=R0801
 from functools import partial
 from importlib.resources import files
 
-import numpy as np
 import pandas as pd
-from scipy.special import gamma
 from scipy.stats import kstest, norm
 
 from .data import gridmet
-from .util import inv_norm
-
-
-def loglogistic_cdf(
-    value: float, p_alpha: float, p_beta: float, p_gamma: float
-) -> float:
-    """CDF of the 3-parameter log-logistic distribution (see Singh, Guo, & Yu, 1993)
-
-    Parameters
-    ----------
-    value : float
-        Must be greater than `gamma`.
-    p_alpha : float
-        Must be greater than 0 (zero).
-    p_beta : float
-        Must be greater than or equal to 1 (one).
-    p_gamma : float
-        Must be less than `value`.
-
-    Returns
-    -------
-    float
-        The CDF evaluated at `value`.
-
-    Raises
-    ------
-    ValueError
-        If `alpha` <= 0, `value` <= `gamma`, or `beta` < 1.
-    """
-    if p_alpha <= 0:
-        raise ValueError("Parameter alpha must be greater than 0 (zero).")
-    if value <= p_gamma:
-        raise ValueError("Value must be greater than the gamma parameter.")
-    if p_beta < 1:
-        raise ValueError("Parameter beta must be greater than or equal to 1 (one).")
-    return np.power((value - p_gamma) / p_alpha, p_beta) / (
-        1 + np.power((value - p_gamma) / p_alpha, p_beta)
-    )
+from .util import inv_norm, GaussianKDE1D
 
 
 class SPEI:
@@ -173,71 +135,22 @@ class SPEI:
         # restrict data to study period (1991-2020)
         data_gen = data_gen.query("end_date >= '1991-01-01'").copy(deep=True)
 
-        # prepare for probability weighted moments (1/2):
-        # get rank i of each value
-        data_gen["rank"] = (
-            data_gen[["area", "month", "value"]]
-            .groupby(by=["area", "month"])
-            .rank(ascending=True, pct=False)
-            .astype(int)
-        )
+        def _inv_norm_wrapper(value: float, kde: GaussianKDE1D) -> float:
+            return inv_norm(kde.opt_cdf(value))
 
-        # prepare for probability weighted moments (2/2):
-        # get number of entries n for each month
-        data_gen = data_gen.merge(
-            right=data_gen.groupby(by=["area", "month"])["value"]
-            .count()
-            .reset_index()
-            .rename(columns={"value": "count"}),
-            left_on=["area", "month"],
-            right_on=["area", "month"],
-        )
-
-        # compute probability weighted moments in separate dataframe
-        pwm = (
-            pd.DataFrame(
-                {
-                    "area": data_gen["area"],
-                    "month": data_gen["month"],
-                    "w0": data_gen.eval("value / count"),
-                    "w1": data_gen.eval(
-                        "value / count * (1 - ((rank - 0.35) / count))"
-                    ),
-                    "w2": data_gen.eval(
-                        "value / count * ((1 - ((rank - 0.35) / count)) ** 2)"
-                    ),
-                }
-            )
-            .groupby(by=["area", "month"])
-            .sum()
-            .reset_index()
-        )
-
-        # compute beta estimate
-        pwm["beta"] = pwm.eval("((2 * w1) - w0) / ((6 * w1) - w0 - (6 * w2))")
-
-        # compute alpha estimate
-        pwm["opo_beta"] = pwm.eval("1 + (1 / beta)").apply(gamma)
-        pwm["omo_beta"] = pwm.eval("1 - (1 / beta)").apply(gamma)
-        pwm["alpha"] = pwm.eval("((w0 - (2 * w1)) * beta) / (opo_beta * omo_beta)")
-
-        # compute gamma estimate
-        pwm["gamma"] = pwm.eval("w0 - ((w0 - (2 * w1)) * beta)")
-
-        # drop intermediate steps, keep final parameter estimates
-        pwm = pwm.drop(columns=["w0", "w1", "w2", "opo_beta", "omo_beta"])
-
-        # compute SPEI using parameter estimates
-        data_gen["SPEI"] = data_gen.merge(
-            right=pwm, left_on=["area", "month"], right_on=["area", "month"]
-        )[["value", "alpha", "beta", "gamma"]].apply(
-            # apply inverse normal transform on each row
-            lambda row: inv_norm(
-                loglogistic_cdf(row["value"], row["alpha"], row["beta"], row["gamma"])
-            ),
-            axis="columns",
-            # pass each row as a pandas.Series object
-            raw=False,
+        transformed_dict = {"index": [], "SPEI": []}
+        for area in ["Bitterroot", "Gallatin"]:
+            for month in range(1, 13):
+                month_data = data_gen.query(f"area == '{area}' and month == {month}")[
+                    "value"
+                ]
+                transformed_dict["index"].extend(month_data.index)
+                month_kde = GaussianKDE1D(month_data.values)
+                transformed_dict["SPEI"].extend(
+                    map(partial(_inv_norm_wrapper, kde=month_kde), month_data.values)
+                )
+        data_gen["SPEI"] = pd.Series(
+            data=transformed_dict["SPEI"], index=transformed_dict["index"]
         )
 
         # ignore computation columns for return value
