@@ -373,7 +373,7 @@ def generate_crosscorr_plots():
             )
             plt.close(fig)
 
-    bv_corr_spi = _get_cross_corr_df("Bitterroot", bv_meta, spi_df)
+    bv_corr_spi = _get_cross_corr_df("Bitterroot", bv_meta, spi_df)    
     gv_corr_spi = _get_cross_corr_df("Gallatin", gv_meta, spi_df)
     bv_corr_spei = _get_cross_corr_df("Bitterroot", bv_meta, spei_df)
     gv_corr_spei = _get_cross_corr_df("Gallatin", gv_meta, spei_df)
